@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TaskRestServiceApplication.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">taskrestservice</a> &gt; <a href="index.source.html" class="el_package">com.assessment</a> &gt; <span class="el_source">TaskRestServiceApplication.java</span></div><h1>TaskRestServiceApplication.java</h1><pre class="source lang-java linenums">package com.assessment;
+
+import java.util.EnumSet;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.FilterRegistration;
+
+import org.eclipse.jetty.servlets.CrossOriginFilter;
+
+import com.assessment.core.service.TaskService;
+import com.assessment.core.service.impl.TaskServiceImpl;
+import com.assessment.db.TaskDAO;
+import com.assessment.db.entity.TaskEntity;
+import com.assessment.resources.TaskResource;
+import com.codahale.metrics.health.HealthCheck;
+
+import io.dropwizard.Application;
+import io.dropwizard.db.DataSourceFactory;
+import io.dropwizard.hibernate.HibernateBundle;
+import io.dropwizard.setup.Bootstrap;
+import io.dropwizard.setup.Environment;
+
+<span class="nc" id="L23">public class TaskRestServiceApplication extends Application&lt;TaskRestServiceConfiguration&gt; {</span>
+
+    public static void main(final String[] args) throws Exception {
+<span class="nc" id="L26">        new TaskRestServiceApplication().run(args);</span>
+<span class="nc" id="L27">    }</span>
+
+    @Override
+    public String getName() {
+<span class="nc" id="L31">        return &quot;taskrestservice&quot;;</span>
+    }
+    
+<span class="nc" id="L34">    private final HibernateBundle&lt;TaskRestServiceConfiguration&gt; hibernate = new HibernateBundle&lt;TaskRestServiceConfiguration&gt;(TaskEntity.class) {</span>
+        @Override
+        public DataSourceFactory getDataSourceFactory(TaskRestServiceConfiguration configuration) {
+<span class="nc" id="L37">            return configuration.getDataSourceFactory();</span>
+        }
+    };
+
+
+    @Override
+    public void initialize(final Bootstrap&lt;TaskRestServiceConfiguration&gt; bootstrap) {
+<span class="nc" id="L44">    	bootstrap.addBundle(hibernate);</span>
+<span class="nc" id="L45">    }</span>
+
+    @Override
+    public void run(final TaskRestServiceConfiguration configuration,
+                    final Environment environment) {
+<span class="nc" id="L50">    	TaskService taskDAO = new TaskServiceImpl(new TaskDAO(hibernate.getSessionFactory()));</span>
+<span class="nc" id="L51">    	environment.jersey().register(new TaskResource(taskDAO));</span>
+    	
+<span class="nc" id="L53">    	environment.healthChecks().register(&quot;taskhealthcheck&quot;, new HealthCheck() {</span>
+
+			@Override
+			protected Result check() throws Exception {
+<span class="nc" id="L57">				return Result.healthy();</span>
+			}
+    		
+    	});
+    	
+    	// Enable CORS headers
+<span class="nc" id="L63">        final FilterRegistration.Dynamic cors =</span>
+<span class="nc" id="L64">            environment.servlets().addFilter(&quot;CORS&quot;, CrossOriginFilter.class);</span>
+
+        // Configure CORS parameters
+<span class="nc" id="L67">        cors.setInitParameter(&quot;allowedOrigins&quot;, &quot;*&quot;);</span>
+<span class="nc" id="L68">        cors.setInitParameter(&quot;allowedHeaders&quot;, &quot;X-Requested-With,Content-Type,Accept,Origin&quot;);</span>
+<span class="nc" id="L69">        cors.setInitParameter(&quot;allowedMethods&quot;, &quot;OPTIONS,GET,PUT,POST,DELETE,HEAD&quot;);</span>
+
+        // Add URL mapping
+<span class="nc" id="L72">        cors.addMappingForUrlPatterns(EnumSet.allOf(DispatcherType.class), true, &quot;/*&quot;);</span>
+<span class="nc" id="L73">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>

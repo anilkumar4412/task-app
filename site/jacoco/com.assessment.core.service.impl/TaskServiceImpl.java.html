@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TaskServiceImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">taskrestservice</a> &gt; <a href="index.source.html" class="el_package">com.assessment.core.service.impl</a> &gt; <span class="el_source">TaskServiceImpl.java</span></div><h1>TaskServiceImpl.java</h1><pre class="source lang-java linenums">package com.assessment.core.service.impl;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.assessment.api.Task;
+import com.assessment.core.service.TaskService;
+import com.assessment.db.TaskDAO;
+import com.assessment.db.entity.TaskEntity;
+
+import io.dropwizard.util.Strings;
+import lombok.extern.slf4j.Slf4j;
+
+<span class="fc" id="L17">@Slf4j</span>
+public class TaskServiceImpl implements TaskService {
+	
+	private TaskDAO taskDAO;
+	
+	public TaskServiceImpl(TaskDAO taskDAO) {
+<span class="fc" id="L23">		super();</span>
+<span class="fc" id="L24">		this.taskDAO = taskDAO;</span>
+<span class="fc" id="L25">	}</span>
+
+	@Override
+	public Task createTask(Task task) {
+<span class="fc" id="L29">		TaskEntity taskEntity =  TaskEntity.builder().description(task.getDescription()).build();</span>
+		try {
+<span class="pc bpc" id="L31" title="1 of 2 branches missed.">			if(!Strings.isNullOrEmpty(task.getTaskDate()))</span>
+<span class="nc" id="L32">				taskEntity.setDate(LocalDate.parse(task.getTaskDate(), DateTimeFormatter.ISO_DATE));</span>
+<span class="nc" id="L33">		}catch (DateTimeParseException e) {</span>
+<span class="nc" id="L34">			log.error(&quot;failed to parse task date..&quot;);</span>
+<span class="nc" id="L35">			throw e;</span>
+<span class="fc" id="L36">		}</span>
+<span class="fc" id="L37">	    Long taskId = taskDAO.create(taskEntity);</span>
+<span class="fc" id="L38">	    task.setId(taskId);</span>
+<span class="fc" id="L39">	    return task;</span>
+	}
+	
+	
+	@Override
+	public Task updateTask(Task task) {
+<span class="fc" id="L45">		TaskEntity taskEntity = taskDAO.findById(task.getId());</span>
+<span class="fc" id="L46">		taskEntity.setDescription(task.getDescription());</span>
+		try {
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">			if(!Strings.isNullOrEmpty(task.getTaskDate()))</span>
+<span class="nc" id="L49">				taskEntity.setDate(LocalDate.parse(task.getTaskDate(), DateTimeFormatter.ISO_DATE));</span>
+<span class="nc" id="L50">		}catch (DateTimeParseException e) {</span>
+<span class="nc" id="L51">			log.error(&quot;failed to parse task date..&quot;);</span>
+<span class="nc" id="L52">			throw e;</span>
+<span class="fc" id="L53">		}</span>
+<span class="fc" id="L54">	    Long taskId = taskDAO.create(taskEntity);</span>
+<span class="fc" id="L55">	    task.setId(taskId);</span>
+<span class="fc" id="L56">	    return task;</span>
+	}
+
+	@Override
+	public Task getTask(long taskId) {
+<span class="fc" id="L61">	    TaskEntity taskEntity = taskDAO.findById(taskId);</span>
+<span class="fc" id="L62">	    Task task =  Task.builder().id(taskEntity.getId()).description(taskEntity.getDescription()).build();</span>
+<span class="pc bpc" id="L63" title="1 of 2 branches missed.">	    if(taskEntity.getDate()!=null)</span>
+<span class="nc" id="L64">				task.setTaskDate(taskEntity.getDate().toString());</span>
+<span class="fc" id="L65">	    return task;</span>
+	}
+
+	@Override
+	public List&lt;Task&gt; getAllTasks() {
+<span class="nc" id="L70">	    List&lt;TaskEntity&gt; taskEntityList = taskDAO.findAll();</span>
+<span class="nc" id="L71">	    List&lt;Task&gt; taskList = new ArrayList&lt;Task&gt;();</span>
+<span class="nc" id="L72">	    taskEntityList.forEach(t -&gt; {</span>
+<span class="nc" id="L73">	    	Task task = Task.builder().id(t.getId()).description(t.getDescription()).build();</span>
+<span class="nc bnc" id="L74" title="All 2 branches missed.">	    	if(t.getDate()!=null)</span>
+<span class="nc" id="L75">				task.setTaskDate(t.getDate().toString());</span>
+<span class="nc" id="L76">	    	taskList.add(task);</span>
+<span class="nc" id="L77">	    });</span>
+<span class="nc" id="L78">	    return taskList;</span>
+	}
+
+	@Override
+	public void deleteTask(long taskId) {
+<span class="nc" id="L83">		taskDAO.deleteById(taskId);</span>
+
+<span class="nc" id="L85">	}</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.7.202105040129</span></div></body></html>
