@@ -6,7 +6,7 @@ const TaskList = (props) => {
   console.log(props);
 
   const deleteTaskHandler = (id) => {
-    props.getId(id);
+    props.getTaskId(id);
   };
 
   const renderTaskList = props.tasks.map((task) => {
@@ -21,11 +21,10 @@ const TaskList = (props) => {
   return (
     <div className="main">
       <h2>
-        <Link to="/add">
+        <Link to={{ pathname: '/Add' }} >
           <button className="ui button blue right">New</button>
-        </Link>
+        </Link> 
       </h2>
-      <br/>
       <br/>
       <br/>
       <div className="ui celled list">{renderTaskList}</div>

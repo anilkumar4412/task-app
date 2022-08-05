@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import { uuid } from "uuidv4";
 import api from "../api/task";
 import "./App.css";
 import Header from "./Header";
@@ -13,7 +12,7 @@ function App() {
   const LOCAL_STORAGE_KEY = "tasks";
   const [tasks, setTasks] = useState([]);
 
-  //RetrieveContacts
+  //RetrieveTasks
   const retrieveTasks = async () => {
     const response = await api.get("/task");
     return response.data;
@@ -27,20 +26,19 @@ function App() {
 
     const response = await api.post("/task", request);
     console.log(response);
-    const allTasks = await retrieveTasks();
-    if (allTasks) setTasks(allTasks);
+    setTasks([...tasks,response.data])
   };
 
   const updateTaskHandler = async (task) => {
     const response = await api.put(`/task/${task.id}`, task);
     const { id, description, taskDate } = response.data;
     setTasks(
-      task.map((task) => {
+      tasks.map((task) => {
         return task.id === id ? { ...response.data } : task;
       })
     );
   };
-
+  
   const removeTaskHandler = async (id) => {
     await api.delete(`/task/${id}`);
     const newTaskList = tasks.filter((task) => {
@@ -49,6 +47,7 @@ function App() {
 
     setTasks(newTaskList);
   };
+  
 
   useEffect(() => {
     // const retriveContacts = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));

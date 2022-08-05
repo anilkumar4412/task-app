@@ -1,4 +1,4 @@
-package com.assessment.command;
+package com.assessment.api;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

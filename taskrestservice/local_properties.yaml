@@ -3,13 +3,13 @@ database:
   driverClass: com.mysql.cj.jdbc.Driver
 
   # the username
-  user: root
+  user: anil
 
   # the password
-  password: password
+  password: Anil@oc123$
 
   # the JDBC URL
-  url: jdbc:mysql://localhost:3306/task_db
+  url: jdbc:mysql://10.0.0.3:3306/task_db
 
   # any properties specific to your JDBC driver:
   properties:

@@ -1,9 +1,5 @@
 package com.assessment.resources;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -16,43 +12,31 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
-import com.assessment.command.Task;
-import com.assessment.dao.TaskDAO;
-import com.assessment.entity.TaskEntity;
+import com.assessment.api.Task;
+import com.assessment.core.service.TaskService;
 import com.codahale.metrics.annotation.Timed;
 
 import io.dropwizard.hibernate.UnitOfWork;
-import io.dropwizard.util.Strings;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
+
 @Path("/task")
 @Produces(MediaType.APPLICATION_JSON)
 public class TaskResource {
+	private TaskService taskService;
 	
-	private TaskDAO taskDAO;
-	
-	public TaskResource(TaskDAO taskDAO) {
+	public TaskResource(TaskService taskService) {
 		super();
-		this.taskDAO = taskDAO;
+		this.taskService = taskService;
 	}
 	
 	@POST
 	@Timed
 	@UnitOfWork
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Task create(@Valid Task task) {
-		TaskEntity taskEntity =  TaskEntity.builder().description(task.getDescription()).build();
-		try {
-			if(!Strings.isNullOrEmpty(task.getTaskDate()))
-				taskEntity.setDate(LocalDate.parse(task.getTaskDate(), DateTimeFormatter.ISO_DATE));
-		}catch (DateTimeParseException e) {
-			log.error("failed to parse task date..");
-		}
-	    Long taskId = taskDAO.create(taskEntity);
-	    task.setId(taskId);
-	    return task;
+	public Response create(@Valid Task task) {
+		return  Response.ok(taskService.createTask(task)).build();
 	}
 	
 	@PUT
@@ -60,52 +44,34 @@ public class TaskResource {
 	@Timed
 	@UnitOfWork
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Task update(@Valid Task task) {
-		TaskEntity taskEntity = taskDAO.findById(task.getId());
-		taskEntity.setDescription(task.getDescription());
-		try {
-			if(!Strings.isNullOrEmpty(task.getTaskDate()))
-				taskEntity.setDate(LocalDate.parse(task.getTaskDate(), DateTimeFormatter.ISO_DATE));
-		}catch (DateTimeParseException e) {
-			log.error("failed to parse task date..");
-		}
-	    Long taskId = taskDAO.create(taskEntity);
-	    task.setId(taskId);
-	    return task;
+	public Response update(@Valid Task task) {
+		return  Response.ok(taskService.updateTask(task)).build();
 	}
 	
 	@GET
 	@Path("/{id}")
 	@Timed
 	@UnitOfWork
-	public Task findTask(@PathParam("id") Long id) {
-	    TaskEntity taskEntity = taskDAO.findById(id);
-	    Task task =  Task.builder().id(taskEntity.getId()).description(taskEntity.getDescription()).build();
-	    if(taskEntity.getDate()!=null)
-				task.setTaskDate(taskEntity.getDate().toString());
-	    return task;
+	public Response findTask(@PathParam("id") Long taskId) {
+	    Task task =  taskService.getTask(taskId);
+	    if(task==null) {
+	    	return Response.status(Response.Status.NOT_FOUND).build();
+	    }
+	    return Response.ok(task).build();
 	}
 	
 	@GET
 	@Timed
 	@UnitOfWork
 	public List<Task> getAllTasks() {
-	    List<TaskEntity> taskEntityList = taskDAO.findAll();
-	    List<Task> taskList = new ArrayList<Task>();
-	    taskEntityList.forEach(t -> {
-	    	Task task = Task.builder().id(t.getId()).description(t.getDescription()).build();
-	    	if(t.getDate()!=null)
-				task.setTaskDate(t.getDate().toString());
-	    	taskList.add(task);
-	    });
-	    return taskList;
+	    return taskService.getAllTasks();
 	}
 	
 	@DELETE
 	@Path("/{id}")
 	@Timed
 	@UnitOfWork
-	public void delete(@PathParam("id") Long id) {
-		 taskDAO.deleteById(id);
+	public void  delete(@PathParam("id") Long taskId) {
+		taskService.deleteTask(taskId);
 	}
 }

@@ -1,10 +1,10 @@
-package com.assessment.dao;
+package com.assessment.db;
 
 import java.util.List;
 
 import org.hibernate.SessionFactory;
 
-import com.assessment.entity.TaskEntity;
+import com.assessment.db.entity.TaskEntity;
 
 import io.dropwizard.hibernate.AbstractDAO;
 
@@ -23,7 +23,7 @@ public class TaskDAO extends AbstractDAO<TaskEntity> {
     }
     
 	public List<TaskEntity> findAll() {
-    	return (List<TaskEntity>) query("from com.assessment.entity.TaskEntity").getResultList();
+    	return (List<TaskEntity>) query("from com.assessment.db.entity.TaskEntity").getResultList();
     }
 	
 	public void deleteById(Long id) {

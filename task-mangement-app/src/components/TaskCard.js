@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import user from "../images/user.png";
+import user from "../images/calender.png";
 
 const TaskCard = (props) => {
   const { id, description, taskDate } = props.task;

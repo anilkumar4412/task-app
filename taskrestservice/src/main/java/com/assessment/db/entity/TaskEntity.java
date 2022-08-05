@@ -1,4 +1,4 @@
-package com.assessment.entity;
+package com.assessment.db.entity;
 
 import java.time.LocalDate;
 
